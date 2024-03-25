@@ -13,6 +13,20 @@ $(document).ready(function() {
         return d * 1000; // Convertir la distancia a metros
     }
 
+    // Función para mostrar la ubicación en pantalla y en la consola
+    function mostrarUbicacionEnPantalla(latitude, longitude, hora) {
+        // Agregar marcador al mapa
+        var mapa = $('#map');
+        mapa.append('<p>Nueva ubicación: Latitud ' + latitude + ', Longitud ' + longitude + ' (Actualizado a las ' + hora + ')</p>');
+        
+        // Agregar entrada a la lista de ubicaciones
+        var ubicaciones = $('#ubicaciones');
+        ubicaciones.append('<div class="ubicacion">Latitud: ' + latitude + ', Longitud: ' + longitude + ' (Actualizado a las ' + hora + ')</div>');
+
+        // Mostrar en la consola
+        console.log("Nueva ubicación: Latitud " + latitude + ", Longitud " + longitude + " (Actualizado a las " + hora + ")");
+    }
+
     // Función para obtener la ubicación actual y actualizar la variable de última ubicación si la distancia es mayor a 2 metros
     function obtenerUbicacion(position) {
         var latitude = position.coords.latitude;
@@ -22,7 +36,7 @@ $(document).ready(function() {
         // Si es la primera ubicación o la distancia a la última ubicación es mayor a 2 metros
         if (!ultimaUbicacion || calcularDistancia(ultimaUbicacion.latitude, ultimaUbicacion.longitude, latitude, longitude) > 2) {
             ultimaUbicacion = {latitude: latitude, longitude: longitude}; // Actualizar la última ubicación
-            console.log("Nueva ubicación: Latitud " + latitude + ", Longitud " + longitude + " (Actualizado a las " + hora + ")");
+            mostrarUbicacionEnPantalla(latitude, longitude, hora); // Mostrar la ubicación en pantalla
         }
     }
 
