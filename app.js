@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    var watchId = null; // Variable para almacenar el ID del seguimiento de la ubicación
     var ultimaUbicacion = null; // Variable para almacenar la última ubicación del usuario
 
     // Función para obtener la distancia entre dos puntos dadas sus coordenadas
@@ -27,30 +26,27 @@ $(document).ready(function() {
         console.log("Nueva ubicación: Latitud " + latitude + ", Longitud " + longitude + " (Actualizado a las " + hora + ")");
     }
 
-    // Función para obtener la ubicación actual y actualizar la variable de última ubicación si la distancia es mayor a 2 metros
-    function obtenerUbicacion(position) {
-        var latitude = position.coords.latitude;
-        var longitude = position.coords.longitude;
-        var hora = new Date().toLocaleTimeString(); // Obtener la hora actual
-        
-        // Si es la primera ubicación o la distancia a la última ubicación es mayor a 2 metros
-        if (!ultimaUbicacion || calcularDistancia(ultimaUbicacion.latitude, ultimaUbicacion.longitude, latitude, longitude) > 2) {
-            // Mostrar alerta con las dos ubicaciones y la diferencia en metros
-            if (ultimaUbicacion) {
-                var distancia = calcularDistancia(ultimaUbicacion.latitude, ultimaUbicacion.longitude, latitude, longitude);
-                alert("Nueva ubicación: Latitud " + latitude + ", Longitud " + longitude + " (Actualizado a las " + hora + ")\n" +
-                      "Última ubicación: Latitud " + ultimaUbicacion.latitude + ", Longitud " + ultimaUbicacion.longitude + "\n" +
-                      "Diferencia: " + distancia.toFixed(2) + " metros");
+    // Función para obtener la ubicación actual y compararla con la última ubicación cada 30 segundos
+    function obtenerUbicacionYComparar() {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            var hora = new Date().toLocaleTimeString(); // Obtener la hora actual
+
+            // Si es la primera ubicación o la distancia a la última ubicación es mayor a 2 metros
+            if (!ultimaUbicacion || calcularDistancia(ultimaUbicacion.latitude, ultimaUbicacion.longitude, latitude, longitude) > 2) {
+                // Mostrar la ubicación en pantalla
+                mostrarUbicacionEnPantalla(latitude, longitude, hora);
+                // Actualizar la última ubicación
+                ultimaUbicacion = {latitude: latitude, longitude: longitude};
             }
-            ultimaUbicacion = {latitude: latitude, longitude: longitude}; // Actualizar la última ubicación
-            mostrarUbicacionEnPantalla(latitude, longitude, hora); // Mostrar la ubicación en pantalla
-        }
+        });
     }
 
     // Solicitar permiso para acceder a la ubicación del usuario al cargar la página
     navigator.geolocation.getCurrentPosition(function(position) {
-        // Manejar la respuesta del usuario (permiso otorgado o denegado)
-        // No es necesario hacer nada aquí, ya que la función de envío del formulario se encargará de iniciar el seguimiento de la ubicación
+        // Obtener la primera ubicación y compararla con la última
+        obtenerUbicacionYComparar();
     });
 
     // Manejar el envío del formulario
@@ -58,12 +54,13 @@ $(document).ready(function() {
         event.preventDefault(); // Evitar que se recargue la página al enviar el formulario
         
         var nombreUsuario = $('#nombreUsuario').val();
-        alert('¡Hola ' + nombreUsuario + '! Se empezará a seguir tu ubicación.');
-        
-        // Obtener la primera ubicación
-        navigator.geolocation.getCurrentPosition(function(position) {
-            obtenerUbicacion(position); // Actualizar la variable de última ubicación
-            watchId = navigator.geolocation.watchPosition(obtenerUbicacion); // Empezar a seguir la ubicación del usuario
-        });
+        alert('¡Hola ' + nombreUsuario + '! Se seguirá tu ubicación cada 30 segundos.');
+
+        // Iniciar la comparación de ubicaciones cada 30 segundos
+        setInterval(function() {
+            obtenerUbicacionYComparar();
+            mostrarUbicacionEnPantalla(ultimaUbicacion.latitude, ultimaUbicacion.longitude, new Date().toLocaleTimeString());
+        }, 30000);
+
     });
 });
