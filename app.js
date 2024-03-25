@@ -35,6 +35,13 @@ $(document).ready(function() {
         
         // Si es la primera ubicación o la distancia a la última ubicación es mayor a 2 metros
         if (!ultimaUbicacion || calcularDistancia(ultimaUbicacion.latitude, ultimaUbicacion.longitude, latitude, longitude) > 2) {
+            // Mostrar alerta con las dos ubicaciones y la diferencia en metros
+            if (ultimaUbicacion) {
+                var distancia = calcularDistancia(ultimaUbicacion.latitude, ultimaUbicacion.longitude, latitude, longitude);
+                alert("Nueva ubicación: Latitud " + latitude + ", Longitud " + longitude + " (Actualizado a las " + hora + ")\n" +
+                      "Última ubicación: Latitud " + ultimaUbicacion.latitude + ", Longitud " + ultimaUbicacion.longitude + "\n" +
+                      "Diferencia: " + distancia.toFixed(2) + " metros");
+            }
             ultimaUbicacion = {latitude: latitude, longitude: longitude}; // Actualizar la última ubicación
             mostrarUbicacionEnPantalla(latitude, longitude, hora); // Mostrar la ubicación en pantalla
         }
