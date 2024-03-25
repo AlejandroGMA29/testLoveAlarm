@@ -28,7 +28,7 @@ function seguirUbicacion() {
                     if (distancia > 2) {
                         alert("La distancia es mayor a 2: " + distancia);
                     } else {
-                        alert("La distancia es menor o igual a 2: " + distancia);
+                    /*     alert("La distancia es menor o igual a 2: " + distancia); */
                     }
                     // Actualizamos las variables globales con la nueva ubicación
                     latitudG = latitud;
