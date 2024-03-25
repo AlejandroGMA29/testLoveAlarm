@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocalización en Tiempo Real</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="app.js"></script>
+    <style>
+        #map {
+            height: 300px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .ubicacion {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Geolocalización en Tiempo Real</h1>
+
+    <form id="formulario">
+        <label for="nombreUsuario">Nombre:</label>
+        <input type="text" id="nombreUsuario" placeholder="Ingresa tu nombre" required>
+        <button type="submit">Enviar Ubicación</button>
+    </form>
+
+    <div id="map"></div>
+
+    <div id="ubicaciones"></div>
+</body>
+</html>
