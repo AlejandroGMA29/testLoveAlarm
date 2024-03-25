@@ -27,10 +27,7 @@ function seguirUbicacion() {
                     var distancia = calcularDistancia(latitudG, longitudG, latitud, longitud);
                     if (distancia > 2) {
                         alert("La distancia es mayor a 2: " + distancia);
-                    } else {
-                    /*     alert("La distancia es menor o igual a 2: " + distancia); */
-                    }
-                    // Actualizamos las variables globales con la nueva ubicación
+                    } 
                     latitudG = latitud;
                     longitudG = longitud;
                 }
