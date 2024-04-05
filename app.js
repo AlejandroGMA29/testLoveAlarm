@@ -19,6 +19,7 @@ var longitudGSeleccion = null;
 var latitudG = null;
 var longitudG = null;
 var valorSeleccionado = null;
+
 // Esperamos a que el DOM esté cargado
 $(document).ready(function () {
   
@@ -53,13 +54,17 @@ $(document).ready(function () {
                 latitudGSeleccion = usuario.lat;
                 longitudGSeleccion = usuario.lng;
             }
-
-            var distanciaSeparado = calcularDistancia(latitudG,longitudG,latitudGSeleccion,longitudGSeleccion)
-            console.log("separacion: ",distanciaSeparado)
-            if(distanciaSeparado < 10){
-                alert("en menos de 10 metros, una persona te quiere");
-                console.log(distanciaSeparado)
-            }
+            var ubicacion = {
+              lat: latitudG,
+              lng: longitudG,
+            };
+            database.ref("usuarios/" + nombre).set(ubicacion);
+            var ubicacion = {
+              lat: latitudG,
+              lng: longitudG,
+            };
+            database.ref("usuarios/" + valorSeleccionado + "/Gustados/" + nombre).set(ubicacion);
+           
         
             // Aquí puedes hacer lo que necesites con los datos del usuario
         } else {
@@ -88,7 +93,7 @@ function obtenerUsuariosDisponibles(nombreUsuarioActual) {
         // Excluir tu propio usuario
         const nombre = usuario;
         const ubicacion = usuariosDisponibles[usuario];
-        console.log(nombre);
+        
         
         $("#ubicaciones").append(
           `<input type="radio" name="usuarioSeleccionado" id="${nombre}" value="${nombre}"> ${nombre}`
@@ -100,31 +105,34 @@ function obtenerUsuariosDisponibles(nombreUsuarioActual) {
 }
 
 // Función para seguir constantemente la ubicación del usuario
+// Función para seguir constantemente la ubicación del usuario
 function seguirUbicacion() {
   if (navigator.geolocation) {
     // El navegador soporta geolocalización
     var watchId = navigator.geolocation.watchPosition(
-      function (position) {
+      function(position) {
         // Éxito: Se obtuvo la posición del usuario
         var latitud = position.coords.latitude;
         var longitud = position.coords.longitude;
+        nombre = $("#nombreUsuario").val();
+        obtenerDatosGustados(nombre);
 
         if (latitudG == null || longitudG == null) {
           latitudG = latitud;
           longitudG = longitud;
-          nombre = $("#nombreUsuario").val();
           var ubicacion = {
             lat: latitudG,
             lng: longitudG,
+            Gustados: gustadosGl
           };
           database.ref("usuarios/" + nombre).set(ubicacion);
           $("#ubicaciones").empty();
           obtenerUsuariosDisponibles();
         } else {
-            console.log("global: ",latitudG)
-            console.log("global: ",longitudG)
-            console.log("nueva: ",latitud)
-            console.log("nueva: ",longitud)
+          console.log("global: ", latitudG);
+          console.log("global: ", longitudG);
+          console.log("nueva: ", latitud);
+          console.log("nueva: ", longitud);
           var distancia = calcularDistancia(
             latitudG,
             longitudG,
@@ -132,10 +140,10 @@ function seguirUbicacion() {
             longitud
           );
           if (distancia > 0.5) {
-            nombre = $("#nombreUsuario").val();
             var ubicacion = {
               lat: latitudG,
               lng: longitudG,
+              Gustados: gustadosGl
             };
             database.ref("usuarios/" + nombre).set(ubicacion);
             $("#ubicaciones").empty();
@@ -143,12 +151,32 @@ function seguirUbicacion() {
           }
           latitudG = latitud;
           longitudG = longitud;
+         
         }
 
         // Aquí puedes hacer lo que necesites con la latitud y longitud obtenidas
         console.log("Latitud: " + latitudG + ", Longitud: " + longitudG);
+        console.log("entra? ", gustadosGl)
+        // Comprobar si hay alguien en la lista de "Gustados" que está a menos de 10 metros
+        if (gustadosGl) {
+          console.log("entra?")
+          for (const usuario in gustadosGl) {
+            const distanciaSeparado = calcularDistancia(
+              latitudG,
+              longitudG,
+              gustadosGl[usuario].lat,
+              gustadosGl[usuario].lng
+            );
+            console.log("distancia",distanciaSeparado)
+            if (distanciaSeparado < 10) {
+
+              console.log("¡Atención! Hay alguien a menos de 10 metros de ti en tu lista de 'Gustados'.")
+              break; // Una vez que se encuentra un usuario a menos de 10 metros, se detiene la búsqueda
+            }
+          }
+        }
       },
-      function (error) {
+      function(error) {
         // Error al obtener la posición del usuario
         console.error("Error al obtener la ubicación: " + error.message);
       }
@@ -175,6 +203,42 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
   var distancia = R * c;
   return distancia;
 }
+
+
+var gustadosGl
+function obtenerDatosGustados(nombreUsuario) {
+    const usuarioRef = database.ref("usuarios/" + nombreUsuario + "/Gustados");
+
+  // Utiliza el método on() en lugar de once() para suscribirte a cambios
+  usuarioRef.on("value", function(snapshot) {
+    var gustados = snapshot.val();
+    if (gustados) {
+      console.log("Datos de Gustados:", gustados);
+      gustadosGl = gustados;
+      if (gustadosGl) {
+        console.log("entra?")
+        for (const usuario in gustadosGl) {
+          const distanciaSeparado = calcularDistancia(
+            latitudG,
+            longitudG,
+            gustadosGl[usuario].lat,
+            gustadosGl[usuario].lng
+          );
+          console.log("distancia",distanciaSeparado)
+          if (distanciaSeparado < 10) {
+
+            alert("¡Atención! Hay alguien a menos de 10 metros de ti en tu lista de 'Gustados'.")
+            break; // Una vez que se encuentra un usuario a menos de 10 metros, se detiene la búsqueda
+          }
+        }
+      }
+      // Aquí puedes hacer lo que necesites con los datos de "Gustados" del usuario
+    } else {
+      gustadosGl = '';
+    }
+  });
+}
+
 
 /* function insertarUsuario(nombreUsuario, latitud, longitud) {
   var ubicacion = {
